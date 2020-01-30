@@ -17,3 +17,5 @@ After execute this command in project folder
 ```
 
 Now you can make a http request on localhost.
+
+or you can access to API from [herokuapp](https://inventoryofbuildings.herokuapp.com/).
