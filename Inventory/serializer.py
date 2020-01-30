@@ -5,6 +5,7 @@ from Inventory.models import *
 class RoomItemSerializer(serializers.ModelSerializer):
     flat = serializers.IntegerField(source='room.flat.flat_number', read_only=True)
     building = serializers.CharField(source='room.flat.building')
+    room = serializers.CharField(source='room.room_name')
 
     class Meta:
         model = RoomItems

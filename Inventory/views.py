@@ -45,6 +45,67 @@ class RoomItemsView(APIView):
                             status=status.HTTP_400_BAD_REQUEST)
 
 
+class ItemView(APIView):
+    def get(self, request, item_id):
+
+        if not request.user.is_authenticated:
+            return Response({'Error': 'Unauthorized person', 'message': 'Login please'},
+                            status=status.HTTP_401_UNAUTHORIZED)
+
+        try:
+            item = RoomItems.objects.get(id=item_id)
+            serializer = RoomItemSerializer(item)
+            return Response(serializer.data)
+        except RoomItems.DoesNotExist:
+            return Response({'Error': 'Not Found', 'message': 'Item Not Found'},
+                            status=status.HTTP_404_NOT_FOUND)
+
+    def put(self, request, item_id):
+        if not request.user.is_authenticated:
+            return Response({'Error': 'Unauthorized person', 'message': 'Login please'},
+                            status=status.HTTP_401_UNAUTHORIZED)
+
+        if not request.data:
+            return Response({'Error': 'Bad Request', 'message': 'Please enter valid body'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        item_name = request.data.get('item_name')
+        room_id = request.data.get('room_id')
+        cost = request.data.get('cost')
+        try:
+            item = RoomItems.objects.get(id=item_id)
+            if item_name:
+                item.item_name = item_name
+            if cost:
+                item.cost = cost
+            if room_id:
+                room = Room.objects.get(id=room_id)
+                item.room = room
+            item.save()
+            return Response({'status': 'OK', 'message': 'Item Updated'},
+                            status=status.HTTP_200_OK)
+        except RoomItems.DoesNotExist:
+            return Response({'Error': 'Not Found', 'message': 'Item Not Found'},
+                            status=status.HTTP_404_NOT_FOUND)
+        except Room.DoesNotExist:
+            return Response({'Error': 'Not Found', 'message': 'Room Not Found'},
+                            status=status.HTTP_404_NOT_FOUND)
+
+    def delete(self, request, item_id):
+        if not request.user.is_authenticated:
+            return Response({'Error': 'Unauthorized person', 'message': 'Login please'},
+                            status=status.HTTP_401_UNAUTHORIZED)
+
+        try:
+            item = RoomItems.objects.get(id=item_id)
+            item.delete()
+            return Response({'Error': 'OK', 'message': 'Item Deleted'},
+                            status=status.HTTP_200_OK)
+        except RoomItems.DoesNotExist:
+            return Response({'Error': 'Not Found', 'message': 'Item Not Found'},
+                            status=status.HTTP_404_NOT_FOUND)
+
+
 class RoomsView(APIView):
     def get(self, request):
         if not request.user.is_authenticated:
@@ -79,7 +140,23 @@ class RoomsView(APIView):
             return Response({'Error': 'Not Found', 'message': 'Invalid Flat ID'},
                             status=status.HTTP_404_NOT_FOUND)
 
-    def put(self, request):
+
+class RoomView(APIView):
+    def get(self, request, room_id):
+
+        if not request.user.is_authenticated:
+            return Response({'Error': 'Unauthorized person', 'message': 'Login please'},
+                            status=status.HTTP_401_UNAUTHORIZED)
+
+        try:
+            item = Room.objects.get(id=room_id)
+            serializer = RoomSerializer(item)
+            return Response(serializer.data)
+        except RoomItems.DoesNotExist:
+            return Response({'Error': 'Not Found', 'message': 'Item Not Found'},
+                            status=status.HTTP_404_NOT_FOUND)
+
+    def put(self, request, room_id):
         if not request.user.is_authenticated:
             return Response({'Error': 'Unauthorized person', 'message': 'Login please'},
                             status=status.HTTP_401_UNAUTHORIZED)
@@ -88,7 +165,6 @@ class RoomsView(APIView):
             return Response({'Error': 'Bad Request', 'message': 'Please enter valid body'},
                             status=status.HTTP_400_BAD_REQUEST)
 
-        room_id = request.data.get('room_id')
         try:
             room = Room.objects.get(id=room_id)
             room_name = request.data.get('room_name')
@@ -107,16 +183,11 @@ class RoomsView(APIView):
             return Response({'Error': 'Not Found', 'message': 'Invalid Flat ID'},
                             status=status.HTTP_404_NOT_FOUND)
 
-    def delete(self, request):
+    def delete(self, request, room_id):
         if not request.user.is_authenticated:
             return Response({'Error': 'Unauthorized person', 'message': 'Login please'},
                             status=status.HTTP_401_UNAUTHORIZED)
 
-        if not request.data:
-            return Response({'Error': 'Bad Request', 'message': 'Please enter valid body'},
-                            status=status.HTTP_400_BAD_REQUEST)
-
-        room_id = request.data.get('room_id')
         try:
             room = Room.objects.get(id=room_id)
             room.delete()
@@ -163,7 +234,24 @@ class FlatsView(APIView):
             return Response({'Error': 'Not Found', 'message': 'Invalid Building Name'},
                             status=status.HTTP_404_NOT_FOUND)
 
-    def put(self, request):
+
+class FlatView(APIView):
+
+    def get(self, request, flat_id):
+
+        if not request.user.is_authenticated:
+            return Response({'Error': 'Unauthorized person', 'message': 'Login please'},
+                            status=status.HTTP_401_UNAUTHORIZED)
+
+        try:
+            flat = Flat.objects.get(id=flat_id)
+            serializer = FlatSerializer(flat)
+            return Response(serializer.data)
+        except RoomItems.DoesNotExist:
+            return Response({'Error': 'Not Found', 'message': 'Item Not Found'},
+                            status=status.HTTP_404_NOT_FOUND)
+
+    def put(self, request, flat_id):
         if not request.user.is_authenticated:
             return Response({'Error': 'Unauthorized person', 'message': 'Login please'},
                             status=status.HTTP_401_UNAUTHORIZED)
@@ -172,7 +260,6 @@ class FlatsView(APIView):
             return Response({'Error': 'Bad Request', 'message': 'Please enter valid body'},
                             status=status.HTTP_400_BAD_REQUEST)
 
-        flat_id = request.data.get('id')
         try:
             flat = Flat.objects.get(id=flat_id)
             flat_number = request.data.get('flat_number')
@@ -194,16 +281,11 @@ class FlatsView(APIView):
             return Response({'Error': 'Not Found', 'message': 'Invalid Building Name'},
                             status=status.HTTP_404_NOT_FOUND)
 
-    def delete(self, request):
+    def delete(self, request, flat_id):
         if request.user.is_authenticated:
             return Response({'Error': 'Unauthorized person', 'message': 'Login please'},
                             status=status.HTTP_401_UNAUTHORIZED)
 
-        if not request.data:
-            return Response({'Error': 'Bad Request', 'message': 'Please enter valid body'},
-                            status=status.HTTP_400_BAD_REQUEST)
-
-        flat_id = request.data.get('id')
         try:
             flat = Flat.objects.get(id=flat_id)
             flat.delete()
@@ -247,7 +329,23 @@ class BuildingsView(APIView):
         new_building.save()
         return Response({'Status': 'Created', 'message': 'Building Created'}, status.HTTP_201_CREATED)
 
-    def put(self, request):
+
+class BuildingView(APIView):
+
+    def get(self, request, building_name):
+        if not request.user.is_authenticated:
+            return Response({'Error': 'Unauthorized person', 'message': 'Login please'},
+                            status=status.HTTP_401_UNAUTHORIZED)
+
+        try:
+            building = Building.objects.get(building_name=building_name)
+            serializer = BuildingSerializer(building)
+            return Response(serializer.data)
+        except RoomItems.DoesNotExist:
+            return Response({'Error': 'Not Found', 'message': 'Item Not Found'},
+                            status=status.HTTP_404_NOT_FOUND)
+
+    def put(self, request, building_name):
         if not request.user.is_authenticated:
             return Response({'Error': 'Unauthorized person', 'message': 'Login please'},
                             status=status.HTTP_401_UNAUTHORIZED)
@@ -255,15 +353,15 @@ class BuildingsView(APIView):
         if not request.data:
             return Response({'Error': 'Bad Request', 'message': 'Please enter valid body'},
                             status=status.HTTP_400_BAD_REQUEST)
-
         name = request.data.get('building_name')
         flat_count = request.data.get('flat_count')
-        if not name or not flat_count:
-            return Response({'Error': 'Bad Request', 'message': 'invalid name or count'},
-                            status=status.HTTP_400_BAD_REQUEST)
+
         try:
-            building = Building.objects.get(building_name=name)
-            building.flat_count = flat_count
+            building = Building.objects.get(building_name=building_name)
+            if flat_count:
+                building.flat_count = flat_count
+            if name:
+                building.building_name = name
             building.save()
         except Building.DoesNotExist:
             return Response({'Error': 'Not Found', 'message': 'Building not found'},
@@ -271,7 +369,7 @@ class BuildingsView(APIView):
 
         return Response({'Status': 'Created', 'message': 'Building Updated'}, status.HTTP_200_OK)
 
-    def delete(self, request):
+    def delete(self, request, building_name):
         if not request.user.is_authenticated:
             return Response({'Error': 'Unauthorized person', 'message': 'Login please'},
                             status=status.HTTP_401_UNAUTHORIZED)
@@ -280,12 +378,8 @@ class BuildingsView(APIView):
             return Response({'Error': 'Bad Request', 'message': 'Please enter valid body'},
                             status=status.HTTP_400_BAD_REQUEST)
 
-        name = request.data.get('building_name')
-        if not name:
-            return Response({'Error': 'Bad Request', 'message': 'invalid name or count'},
-                            status=status.HTTP_400_BAD_REQUEST)
         try:
-            building = Building.objects.get(building_name=name)
+            building = Building.objects.get(building_name=building_name)
             building.delete()
         except Building.DoesNotExist:
             return Response({'Error': 'Not Found', 'message': 'Building not found'},
