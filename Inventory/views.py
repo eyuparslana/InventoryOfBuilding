@@ -437,3 +437,9 @@ class AuthView(APIView):
         except User.DoesNotExist:
             return Response({'status': 'Bad Request', 'message': 'Invalid username or password'},
                             status=status.HTTP_404_NOT_FOUND)
+
+
+class IndexView(APIView):
+
+    def get(self, request):
+        return Response({'message': 'Welcome to inventory app. Please go to login or register page'})
