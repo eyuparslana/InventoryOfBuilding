@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include
 from Inventory import views
+from InventoryProject import settings
 
 urlpatterns = [
     path('', views.IndexView.as_view()),
